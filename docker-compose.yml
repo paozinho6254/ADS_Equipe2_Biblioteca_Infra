@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 1. Banco de Dados MySQL
   mysqldb:
@@ -7,10 +5,10 @@ services:
     container_name: unibiblio-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: unibibliodb
-      MYSQL_USER: unibiblio_user
-      MYSQL_PASSWORD: unibiblio_pass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
@@ -30,9 +28,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/unibibliodb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: unibiblio_user
-      SPRING_DATASOURCE_PASSWORD: unibiblio_pass
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     depends_on:
       mysqldb:
