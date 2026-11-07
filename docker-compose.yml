@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # 1. Banco de Dados MySQL
+  mysqldb:
+    image: mysql:8.0
+    container_name: unibiblio-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: unibibliodb
+      MYSQL_USER: unibiblio_user
+      MYSQL_PASSWORD: unibiblio_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Back-end (Spring Boot)
+  backend:
+    build:
+      context: ../ADS_Equipe2_Biblioteca_Back
+      dockerfile: Dockerfile
+    container_name: unibiblio-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/unibibliodb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: unibiblio_user
+      SPRING_DATASOURCE_PASSWORD: unibiblio_pass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+
+  # 3. Front-end (Angular + Nginx)
+  frontend:
+    build:
+      context: ../ADS_Equipe2_Biblioteca_Front
+      dockerfile: Dockerfile
+    container_name: unibiblio-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
